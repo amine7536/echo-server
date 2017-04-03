@@ -63,7 +63,7 @@ func handleConnection(conn net.Conn, connUUID uuid.UUID) {
 	for {
 		readBytes, err := bufr.Read(buf)
 		if err != nil {
-			common.Log("WARNING", fmt.Sprintf("connUUID=%s, client=%s, err=%s", connUUID, err, conn.RemoteAddr()))
+			common.Log("WARNING", fmt.Sprintf("connUUID=%s, client=%s, err=%s", connUUID, conn.RemoteAddr(), err))
 			conn.Close()
 			return
 		}
