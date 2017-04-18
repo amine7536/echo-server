@@ -42,9 +42,8 @@ Options:
 	tcpserver.Start(service, handleConnection)
 }
 
-func handleConnection(c3r tcpserver.C3Request) {
-	// c3r.Read()
-	c3r.Write()
+func handleConnection(req tcpserver.EchoRequest) {
+	req.Read()
 }
 
 func checkerror(err error, level string) {

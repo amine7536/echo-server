@@ -9,31 +9,44 @@ import (
 	"github.com/amine7536/echo-server/common"
 )
 
-type handlerFunc func(C3Request)
+type handlerFunc func(EchoRequest)
 
-// C3Request incoming C3Request
-type C3Request struct {
+// EchoRequest incoming EchoRequest
+type EchoRequest struct {
 	Proto      string
 	ProtoMajor int
 	ProtMinor  int
+	Body       []byte
 	GetBody    func() ([]byte, error)
 	RemoteAddr net.Addr
 	Conn       net.Conn
 }
 
-func (c3r *C3Request) Write() error {
-	if c3r.Conn == nil {
+func (req *EchoRequest) Write() error {
+	if req.Conn == nil {
 		return errors.New("Error no connection")
 	}
 
-	c3r.Conn.Write([]byte("Hello"))
+	req.Conn.Write(req.Body)
 
 	return nil
 }
 
-func (c3r *C3Request) Read() error {
-	bufr := bufio.NewReader(c3r.Conn)
-	return nil
+func (req *EchoRequest) Read() error {
+	defer req.Conn.Close()
+	bufr := bufio.NewReader(req.Conn)
+	buf := make([]byte, 1024)
+
+	for {
+		readBytes, err := bufr.Read(buf)
+		if err != nil {
+			req.Conn.Close()
+			return err
+		}
+		req.Body = buf[:readBytes]
+		req.Write()
+		req.Conn.Close()
+	}
 }
 
 // A Handler responds to an C3 request.
@@ -41,11 +54,11 @@ func (c3r *C3Request) Read() error {
 // ServeC3 should write reply data to the ResponseWriter
 // and then return.
 type Handler interface {
-	ServeC3(C3ResponseWriter, *C3Request)
+	ServeECHO(EchoResponseWriter, *EchoRequest)
 }
 
 // TCPResponseWriter interface
-type C3ResponseWriter interface {
+type EchoResponseWriter interface {
 	Write([]byte) error
 }
 
@@ -64,15 +77,15 @@ mainloop:
 			break mainloop
 		}
 
-		c3request := C3Request{
-			Proto:      "C3",
+		EchoRequest := EchoRequest{
+			Proto:      "Echo",
 			ProtoMajor: 1,
 			ProtMinor:  2,
 			Conn:       conn,
 			RemoteAddr: conn.RemoteAddr(),
 		}
 
-		go fn(c3request)
+		go fn(EchoRequest)
 	}
 	return nil
 }
