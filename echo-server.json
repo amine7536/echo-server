@@ -1,0 +1,9 @@
+{
+  "listen": "localhost",
+  "port": 3000,
+  "log_config": {
+    "level": "debug",
+    "file": "echo-server.log",
+    "format": "json"
+  }
+}

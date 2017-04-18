@@ -1,0 +1,6 @@
+package: github.com/amine7536/echo-server
+import:
+- package: github.com/Sirupsen/logrus
+  version: ^0.11.5
+- package: github.com/spf13/cobra
+- package: github.com/spf13/viper
