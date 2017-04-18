@@ -1,12 +1,11 @@
-package tcpserver
+package server
 
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"net"
 
-	"github.com/amine7536/echo-server/common"
+	"github.com/Sirupsen/logrus"
 )
 
 type handlerFunc func(EchoRequest)
@@ -48,12 +47,12 @@ func (req *EchoRequest) Read() error {
 }
 
 // Start the server
-func Start(service string, fn handlerFunc) error {
+func Start(service string, fn handlerFunc, logger *logrus.Entry) error {
 	server, err := net.Listen("tcp", service)
 	if err != nil {
 		return err
 	}
-	common.Log("INFO", fmt.Sprintf("Server started listening on %s", service))
+	logger.Infof("Server started listening on %s", service)
 
 mainloop:
 	for {
