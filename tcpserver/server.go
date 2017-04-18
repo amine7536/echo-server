@@ -17,12 +17,13 @@ type EchoRequest struct {
 	ProtoMajor int
 	ProtMinor  int
 	Body       []byte
-	GetBody    func() ([]byte, error)
 	RemoteAddr net.Addr
 	Conn       net.Conn
 }
 
 func (req *EchoRequest) Write() error {
+	defer req.Conn.Close()
+
 	if req.Conn == nil {
 		return errors.New("Error no connection")
 	}
@@ -33,33 +34,17 @@ func (req *EchoRequest) Write() error {
 }
 
 func (req *EchoRequest) Read() error {
-	defer req.Conn.Close()
 	bufr := bufio.NewReader(req.Conn)
 	buf := make([]byte, 1024)
 
-	for {
-		readBytes, err := bufr.Read(buf)
-		if err != nil {
-			req.Conn.Close()
-			return err
-		}
-		req.Body = buf[:readBytes]
-		req.Write()
+	readBytes, err := bufr.Read(buf)
+	if err != nil {
 		req.Conn.Close()
+		return err
 	}
-}
+	req.Body = buf[:readBytes]
 
-// A Handler responds to an C3 request.
-//
-// ServeC3 should write reply data to the ResponseWriter
-// and then return.
-type Handler interface {
-	ServeECHO(EchoResponseWriter, *EchoRequest)
-}
-
-// TCPResponseWriter interface
-type EchoResponseWriter interface {
-	Write([]byte) error
+	return nil
 }
 
 // Start the server

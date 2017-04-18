@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	version     = "0.1.0"
+	version     = "0.2.0"
 	programName = "Echo Server"
 )
 
@@ -39,11 +39,14 @@ Options:
 	port := arguments["--port"].(string)
 	service := host + ":" + port
 
-	tcpserver.Start(service, handleConnection)
+	tcpserver.Start(service, echoFunc)
 }
 
-func handleConnection(req tcpserver.EchoRequest) {
+func echoFunc(req tcpserver.EchoRequest) {
+	// Read request data
 	req.Read()
+	// Reply with the same data
+	req.Write()
 }
 
 func checkerror(err error, level string) {
