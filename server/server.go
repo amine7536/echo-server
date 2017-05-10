@@ -47,19 +47,32 @@ func (req *EchoRequest) Read() error {
 	return nil
 }
 
-// Start the server
-func Start(service string, fn handlerFunc, logger *logrus.Entry) error {
-	server, err := net.Listen("tcp", service)
-	if err != nil {
-		return err
-	}
-	logger.Infof("Server started listening on %s", service)
+// EchoServer server struct
+type EchoServer struct {
+	conn   net.Listener
+	logger *logrus.Entry
+}
 
-mainloop:
+// New initialize a new EchoServer
+func New(conn net.Listener, logger *logrus.Entry) *EchoServer {
+	s := &EchoServer{
+		conn:   conn,
+		logger: logger,
+	}
+
+	return s
+}
+
+// ListenAndEcho listen for connection a echo
+func (s *EchoServer) ListenAndEcho(fn handlerFunc) error {
+	s.logger.Infof("Server started listening on %s", s.conn.Addr())
+
+	// mainloop:
 	for {
-		conn, err := server.Accept()
+		conn, err := s.conn.Accept()
 		if err != nil {
-			break mainloop
+			return err
+			// break mainloop
 		}
 
 		EchoRequest := EchoRequest{
@@ -72,5 +85,5 @@ mainloop:
 
 		go fn(EchoRequest)
 	}
-	return nil
+
 }
