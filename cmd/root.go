@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"log"
+	"net"
 	"strconv"
 
 	"github.com/amine7536/echo-server/conf"
@@ -54,7 +55,7 @@ func run(cmd *cobra.Command, args []string) {
 		}
 
 		// Log request body if log level is debug
-		logger.Debugf("%s", req.Body)
+		logger.Debugf("req.Body=%s", req.Body)
 
 		// Reply with the same data
 		writeError := req.Write()
@@ -63,6 +64,12 @@ func run(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	// Start the Application
-	server.Start(service, echoFunc, logger)
+	conn, err := net.Listen("tcp", service)
+	if err != nil {
+		logger.Fatalf("Error %s", err.Error())
+	}
+
+	s := server.New(conn, logger)
+	s.ListenAndEcho(echoFunc)
+
 }
