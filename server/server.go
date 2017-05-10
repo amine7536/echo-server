@@ -3,6 +3,7 @@ package server
 import (
 	"bufio"
 	"errors"
+	"io"
 	"net"
 
 	"github.com/Sirupsen/logrus"
@@ -17,7 +18,7 @@ type EchoRequest struct {
 	ProtMinor  int
 	Body       []byte
 	RemoteAddr net.Addr
-	Conn       net.Conn
+	Conn       io.ReadWriteCloser
 }
 
 func (req *EchoRequest) Write() error {

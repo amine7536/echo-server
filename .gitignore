@@ -21,3 +21,6 @@
 
 # Go vendored libs
 /vendor/*/
+
+# Build dir
+build
